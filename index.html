@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala do Coroinha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth.js/1.6.0/mammoth.browser.min.js"></script>
+<style>
+  :root{
+    --red-deep:#A6192E;
+    --red-garnet:#5E0F1F;
+    --red-garnet-2:#7A1626;
+    --gold:#C9A227;
+    --ivory:#FBF9F5;
+    --blush:#F5E9E6;
+    --blush-2:#EDD9D4;
+    --ink:#2B1210;
+    --ink-soft:#7A5C57;
+    --line:#E7D9D5;
+    --white:#FFFFFF;
+    --radius-card:18px;
+    --shadow-soft: 0 8px 24px -12px rgba(94,15,31,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,.serif{
+    font-family:'Fraunces',serif;
+    letter-spacing:-0.01em;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+
+  /* ---------- NAV ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    background:rgba(251,249,245,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1080px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 20px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand svg{width:26px;height:26px;flex-shrink:0;}
+  .brand-text{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--red-garnet);}
+  .navlinks{display:flex;gap:4px;}
+  .navlink{
+    padding:8px 14px;border-radius:999px;font-size:0.92rem;font-weight:500;
+    color:var(--ink-soft);transition:background .15s, color .15s;
+    white-space:nowrap;
+  }
+  .navlink:hover{background:var(--blush);color:var(--ink);}
+  .navlink.active{background:var(--red-garnet);color:var(--white);}
+  .hamburger{display:none;background:none;border:none;padding:8px;}
+  .hamburger svg{width:22px;height:22px;color:var(--red-garnet);}
+  .mobile-menu{display:none;flex-direction:column;padding:8px 20px 16px;gap:4px;}
+  .mobile-menu.open{display:flex;}
+  @media (max-width:760px){
+    .navlinks{display:none;}
+    .hamburger{display:block;}
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .page{max-width:1080px;margin:0 auto;padding:28px 20px 80px;}
+  .page-title{font-size:1.5rem;font-weight:600;margin:0 0 4px;}
+  .page-sub{color:var(--ink-soft);font-size:0.94rem;margin:0 0 28px;}
+  .grid-dash{display:grid;grid-template-columns:1.15fr 0.85fr;gap:22px;align-items:start;}
+  @media (max-width:840px){.grid-dash{grid-template-columns:1fr;}}
+
+  /* ---------- HERO ARCH CARD ---------- */
+  .arch-card{
+    background:linear-gradient(180deg,var(--red-garnet-2) 0%, var(--red-garnet) 100%);
+    color:var(--ivory);
+    border-radius:160px 160px 20px 20px;
+    padding:56px 34px 34px;
+    text-align:center;
+    position:relative;
+    box-shadow: var(--shadow-soft);
+    overflow:hidden;
+  }
+  .arch-card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:4px;
+    background:linear-gradient(90deg,transparent, var(--gold), transparent);
+  }
+  .arch-icon{
+    width:34px;height:34px;margin:0 auto 14px;color:var(--gold);opacity:0.9;
+  }
+  .arch-eyebrow{font-size:0.72rem;letter-spacing:0.14em;color:var(--gold);font-weight:600;margin-bottom:10px;}
+  .arch-date{font-family:'Fraunces',serif;font-size:1.55rem;font-weight:600;margin:0 0 6px;}
+  .arch-time{font-size:1.6rem;font-weight:700;margin:0 0 4px;}
+  .arch-func{font-size:1.02rem;color:#F0D9D3;margin:0 0 18px;}
+  .arch-countdown{
+    display:inline-block;background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.25);
+    padding:8px 18px;border-radius:999px;font-size:0.88rem;font-weight:500;
+  }
+  .arch-empty{font-size:1.05rem;color:#F0D9D3;padding:20px 0 6px;}
+
+  /* ---------- QUOTE CARD ---------- */
+  .quote-card{
+    margin-top:20px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-left:3px solid var(--gold);
+    border-radius:14px;
+    padding:20px 22px;
+  }
+  .quote-text{font-family:'Fraunces',serif;font-style:italic;font-size:1.02rem;line-height:1.5;color:var(--ink);margin:0 0 8px;}
+  .quote-attr{font-size:0.8rem;color:var(--ink-soft);}
+
+  /* ---------- GENERIC CARD / LIST ---------- */
+  .card{
+    background:var(--white);border:1px solid var(--line);
+    border-radius:var(--radius-card);padding:20px;
+  }
+  .card+.card{margin-top:14px;}
+  .card-title{font-size:1rem;font-weight:600;margin:0 0 14px;display:flex;align-items:center;justify-content:space-between;}
+  .link-quiet{color:var(--red-deep);font-size:0.85rem;font-weight:500;}
+
+  .event-row{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:14px 0;border-top:1px solid var(--line);
+  }
+  .event-row:first-child{border-top:none;padding-top:0;}
+  .event-date-chip{
+    flex-shrink:0;width:52px;text-align:center;
+    background:var(--blush);border-radius:12px;padding:8px 4px;
+  }
+  .event-date-chip .d{font-family:'Fraunces',serif;font-weight:700;font-size:1.1rem;color:var(--red-garnet);line-height:1;}
+  .event-date-chip .m{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-soft);}
+  .event-main{flex:1;min-width:0;}
+  .event-func{font-weight:600;font-size:0.95rem;}
+  .event-meta{font-size:0.83rem;color:var(--ink-soft);margin-top:2px;}
+  .badge{
+    display:inline-block;font-size:0.68rem;font-weight:600;padding:2px 8px;
+    border-radius:999px;margin-left:8px;letter-spacing:0.02em;
+  }
+  .badge-manual{background:var(--blush-2);color:var(--red-garnet);}
+  .badge-importado{background:#E7EEE0;color:#4B6B33;}
+  .badge-warn{background:#FBEAC2;color:#8A6300;}
+  .empty-state{
+    text-align:center;padding:40px 20px;color:var(--ink-soft);
+  }
+  .empty-state svg{width:38px;height:38px;color:var(--blush-2);margin-bottom:10px;}
+
+  /* ---------- FORMS ---------- */
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:0.85rem;font-weight:600;margin-bottom:6px;color:var(--ink);}
+  .field .hint{font-size:0.76rem;color:var(--ink-soft);margin-top:4px;}
+  .field input, .field select, .field textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    font-size:0.92rem;background:var(--ivory);color:var(--ink);
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none;border-color:var(--red-deep);background:var(--white);
+  }
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){.field-row{grid-template-columns:1fr;}}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:11px 20px;border-radius:999px;border:none;font-size:0.92rem;font-weight:600;
+    transition:transform .1s, background .15s;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--red-deep);color:var(--white);}
+  .btn-primary:hover{background:var(--red-garnet);}
+  .btn-ghost{background:var(--blush);color:var(--red-garnet);}
+  .btn-ghost:hover{background:var(--blush-2);}
+  .btn-text{background:none;color:var(--ink-soft);padding:8px 10px;}
+  .btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  /* ---------- FILTER PILLS ---------- */
+  .pillbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .pill{
+    padding:7px 15px;border-radius:999px;font-size:0.84rem;font-weight:500;
+    background:var(--white);border:1px solid var(--line);color:var(--ink-soft);
+  }
+  .pill.active{background:var(--red-garnet);color:var(--white);border-color:var(--red-garnet);}
+
+  /* ---------- IMPORT FLOW ---------- */
+  .dropzone{
+    border:2px dashed var(--blush-2);border-radius:18px;padding:44px 20px;text-align:center;
+    background:var(--white);cursor:pointer;transition:border-color .15s, background .15s;
+  }
+  .dropzone:hover, .dropzone.drag{border-color:var(--red-deep);background:var(--blush);}
+  .dropzone svg{width:36px;height:36px;color:var(--red-deep);margin-bottom:12px;}
+  .dropzone .dz-title{font-weight:600;margin-bottom:4px;}
+  .dropzone .dz-sub{font-size:0.83rem;color:var(--ink-soft);}
+  .steps{display:flex;gap:6px;margin-bottom:26px;}
+  .step-dot{flex:1;height:4px;border-radius:4px;background:var(--line);}
+  .step-dot.done{background:var(--red-deep);}
+  .spinner{
+    width:34px;height:34px;border-radius:50%;border:3px solid var(--blush-2);
+    border-top-color:var(--red-deep);animation:spin 0.8s linear infinite;margin:0 auto 16px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .review-item{
+    border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;background:var(--white);
+  }
+  .review-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .review-head input[type=checkbox]{width:18px;height:18px;accent-color:var(--red-deep);}
+  .review-head .rh-name{font-weight:600;flex:1;}
+  .review-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  @media (max-width:640px){.review-grid{grid-template-columns:1fr 1fr;}}
+  .mini-field label{font-size:0.72rem;color:var(--ink-soft);display:block;margin-bottom:3px;}
+  .mini-field input{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:0.85rem;background:var(--ivory);}
+  .warn-line{font-size:0.76rem;color:#8A6300;margin-top:8px;display:flex;align-items:center;gap:5px;}
+  .banner{
+    background:var(--blush);border:1px solid var(--blush-2);border-radius:14px;
+    padding:14px 16px;font-size:0.88rem;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .banner-err{background:#FDEEEE;border-color:#F3C9C9;color:#8A2323;}
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:var(--white);padding:12px 20px;border-radius:999px;
+    font-size:0.85rem;z-index:100;box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  }
+  .settings-row{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;}
+  .settings-row .field{flex:1;min-width:200px;margin-bottom:0;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+/* ================= CROSS ICON / SVG HELPERS ================= */
+const ICONS = {
+  cross: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M7 8h10" stroke-linecap="round"/></svg>`,
+  flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2c1 3-3 4-3 8a3 3 0 006 0c0-1.5-1-2-1-3.5 2 1 3.5 3.5 3.5 6a5.5 5.5 0 11-11 0C6.5 8 9 5 12 2z" stroke-linejoin="round"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18" stroke-linecap="round"/></svg>`,
+  plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>`,
+  upload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 16V4M6 10l6-6 6 6M4 20h16" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1z" stroke-linejoin="round"/></svg>`,
+  list: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round"/></svg>`,
+  menu: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/></svg>`,
+  empty: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18M9 15h6" stroke-linecap="round"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+};
+
+/* ================= STATE ================= */
+const state = {
+  page: 'inicio',
+  menuOpen: false,
+  perfil: { nome: '' },
+  eventos: [],
+  apiKeyClaude: '',
+  apiKeyGemini: '',
+  provider: 'claude',
+  loaded: false,
+  toast: null,
+  calFiltro: 'proximos',
+  calOrdem: 'data',
+  importFlow: { step: 'upload', fileName: '', rawText: '', extracted: [], erro: null, processando: false }
+};
+
+/* ================= STORAGE (localStorage - site estático) ================= */
+async function loadData(){
+  try{
+    const p = localStorage.getItem('coroinha_perfil');
+    if(p) state.perfil = JSON.parse(p);
+  }catch(e){ /* no perfil yet */ }
+  try{
+    const ev = localStorage.getItem('coroinha_eventos');
+    if(ev) state.eventos = JSON.parse(ev);
+  }catch(e){ /* no eventos yet */ }
+  try{
+    const kc = localStorage.getItem('coroinha_api_key_claude');
+    if(kc) state.apiKeyClaude = kc;
+    const kg = localStorage.getItem('coroinha_api_key_gemini');
+    if(kg) state.apiKeyGemini = kg;
+    const prov = localStorage.getItem('coroinha_provider');
+    if(prov === 'claude' || prov === 'gemini') state.provider = prov;
+  }catch(e){ /* sem chave salva */ }
+  state.loaded = true;
+  render();
+}
+async function savePerfil(){
+  try{ localStorage.setItem('coroinha_perfil', JSON.stringify(state.perfil)); }
+  catch(e){ showToast('Não foi possível salvar o perfil agora.'); }
+}
+async function saveEventos(){
+  try{ localStorage.setItem('coroinha_eventos', JSON.stringify(state.eventos)); }
+  catch(e){ showToast('Não foi possível salvar os eventos agora.'); }
+}
+function salvarProvider(valor){
+  state.provider = valor;
+  try{ localStorage.setItem('coroinha_provider', state.provider); }catch(e){}
+}
+function salvarApiKeyClaude(valor){
+  state.apiKeyClaude = valor.trim();
+  try{
+    if(state.apiKeyClaude) localStorage.setItem('coroinha_api_key_claude', state.apiKeyClaude);
+    else localStorage.removeItem('coroinha_api_key_claude');
+  }catch(e){}
+}
+function salvarApiKeyGemini(valor){
+  state.apiKeyGemini = valor.trim();
+  try{
+    if(state.apiKeyGemini) localStorage.setItem('coroinha_api_key_gemini', state.apiKeyGemini);
+    else localStorage.removeItem('coroinha_api_key_gemini');
+  }catch(e){}
+}
+
+/* ================= HELPERS ================= */
+const DIAS = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MESES_FULL = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function parseISODate(str){
+  if(!str) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(str);
+  if(!m) return null;
+  return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+}
+function diaDaSemana(isoStr){
+  const d = parseISODate(isoStr);
+  if(!d) return null;
+  return DIAS[d.getDay()];
+}
+function formatDiaMes(isoStr){
+  const d = parseISODate(isoStr);
+  if(!d) return {d:'--', m:'--'};
+  return { d: String(d.getDate()).padStart(2,'0'), m: MESES[d.getMonth()] };
+}
+function formatDataLonga(isoStr){
+  const d = parseISODate(isoStr);
+  if(!d) return 'Data a confirmar';
+  return `${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES_FULL[d.getMonth()]}`;
+}
+function hojeISO(){
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+}
+function uid(){ return 'ev_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+
+function eventoDataHora(ev){
+  const d = parseISODate(ev.data);
+  if(!d) return null;
+  if(ev.horario){
+    const [h,mi] = ev.horario.split(':').map(Number);
+    d.setHours(h||0, mi||0, 0, 0);
+  }
+  return d;
+}
+function proximoEvento(){
+  const agora = new Date();
+  return state.eventos
+    .filter(e => e.data)
+    .map(e => ({ e, dt: eventoDataHora(e) }))
+    .filter(x => x.dt && x.dt >= new Date(agora.getFullYear(),agora.getMonth(),agora.getDate()))
+    .sort((a,b) => a.dt - b.dt)[0];
+}
+function contagemRegressiva(dt){
+  const diffMs = dt - new Date();
+  if(diffMs <= 0) return 'é hoje';
+  const dias = Math.floor(diffMs / 86400000);
+  const horas = Math.floor((diffMs % 86400000) / 3600000);
+  if(dias === 0) return horas <= 1 ? 'em menos de 1 hora' : `faltam ${horas} horas`;
+  if(dias === 1) return 'falta 1 dia';
+  return `faltam ${dias} dias`;
+}
+function showToast(msg){
+  state.toast = msg;
+  render();
+  setTimeout(()=>{ state.toast = null; render(); }, 3200);
+}
+function escapeHtml(s){
+  if(s === null || s === undefined) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ================= NAV ================= */
+const NAV_ITEMS = [
+  {id:'inicio', label:'Início'},
+  {id:'minhaescala', label:'Minha Escala'},
+  {id:'calendario', label:'Calendário'},
+  {id:'adicionar', label:'Adicionar Evento'},
+  {id:'importar', label:'Importar Escala'}
+];
+function goTo(page){
+  state.page = page;
+  state.menuOpen = false;
+  window.scrollTo(0,0);
+  render();
+}
+
+function renderTopbar(){
+  const links = NAV_ITEMS.map(it => `
+    <a class="navlink ${state.page===it.id?'active':''}" onclick="goTo('${it.id}')">${it.label}</a>
+  `).join('');
+  return `
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">${ICONS.cross}<span class="brand-text">Escala do Coroinha</span></div>
+      <div class="navlinks">${links}</div>
+      <button class="hamburger" onclick="toggleMenu()">${ICONS.menu}</button>
+    </div>
+    <div class="mobile-menu ${state.menuOpen?'open':''}">${links}</div>
+  </div>`;
+}
+function toggleMenu(){ state.menuOpen = !state.menuOpen; render(); }
+
+/* ================= PAGE: INÍCIO ================= */
+function renderInicio(){
+  const prox = proximoEvento();
+  const upcoming = state.eventos
+    .filter(e=>e.data)
+    .map(e=>({e,dt:eventoDataHora(e)}))
+    .filter(x=>x.dt && x.dt >= new Date(new Date().setHours(0,0,0,0)))
+    .sort((a,b)=>a.dt-b.dt)
+    .slice(0,5);
+
+  let heroHtml;
+  if(prox){
+    const e = prox.e;
+    heroHtml = `
+      <div class="arch-card">
+        <div class="arch-icon">${ICONS.flame}</div>
+        <div class="arch-eyebrow">PRÓXIMO SERVIÇO</div>
+        <div class="arch-date">${formatDataLonga(e.data)}</div>
+        <div class="arch-time">${e.horario ? e.horario : 'Horário a confirmar'}</div>
+        <div class="arch-func">Função: ${e.funcao ? escapeHtml(e.funcao) : 'a confirmar'}${e.local?` · ${escapeHtml(e.local)}`:''}</div>
+        <div class="arch-countdown">${contagemRegressiva(prox.dt)}</div>
+      </div>`;
+  } else {
+    heroHtml = `
+      <div class="arch-card">
+        <div class="arch-icon">${ICONS.flame}</div>
+        <div class="arch-eyebrow">PRÓXIMO SERVIÇO</div>
+        <div class="arch-empty">Nenhum próximo serviço registrado.</div>
+        <button class="btn btn-primary" style="margin-top:6px;" onclick="goTo('importar')">Importar escala</button>
+      </div>`;
+  }
+
+  const listaHtml = upcoming.length ? upcoming.map(x=>renderEventRow(x.e)).join('') : `
+    <div class="empty-state">${ICONS.empty}<div>Sem serviços futuros por enquanto.</div></div>`;
+
+  const perfilBanner = !state.perfil.nome ? `
+    <div class="banner">
+      <span>Defina seu nome para que a IA encontre seus serviços na escala.</span>
+      <button class="btn btn-ghost" onclick="goTo('minhaescala')">Definir nome</button>
+    </div>` : '';
+
+  return `
+    <div class="page">
+      ${perfilBanner}
+      <div class="grid-dash">
+        <div>
+          ${heroHtml}
+          <div class="quote-card">
+            <p class="quote-text">"Antes morrer do que entregar o Corpo Santo de Jesus."</p>
+            <div class="quote-attr">São Tarcísio, padroeiro dos coroinhas</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Próximos serviços <a class="link-quiet" onclick="goTo('calendario')">ver todos</a></div>
+          ${listaHtml}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderEventRow(e){
+  const {d,m} = formatDiaMes(e.data);
+  const badge = e.origem === 'manual'
+    ? `<span class="badge badge-manual">Manual</span>`
+    : `<span class="badge badge-importado">Importado</span>`;
+  const warn = e.incompleto ? `<span class="badge badge-warn">confirmar dados</span>` : '';
+  return `
+    <div class="event-row">
+      <div class="event-date-chip"><div class="d">${d}</div><div class="m">${m}</div></div>
+      <div class="event-main">
+        <div class="event-func">${e.funcao ? escapeHtml(e.funcao) : 'Função a confirmar'} ${badge}${warn}</div>
+        <div class="event-meta">${e.data ? diaDaSemana(e.data) : 'Dia a confirmar'}${e.horario ? ' · '+e.horario : ''}${e.local ? ' · '+escapeHtml(e.local) : ''}</div>
+      </div>
+    </div>`;
+}
+
+/* ================= PAGE: MINHA ESCALA ================= */
+function renderMinhaEscala(){
+  const meus = state.eventos.slice().sort((a,b)=>{
+    const da = a.data || '9999-99-99', db = b.data || '9999-99-99';
+    return da.localeCompare(db);
+  });
+  const total = meus.length;
+  const passados = meus.filter(e=>e.data && e.data < hojeISO()).length;
+  const futuros = total - passados;
+
+  return `
+    <div class="page">
+      <div class="page-title">Minha Escala</div>
+      <div class="page-sub">Seu perfil e o resumo de todos os serviços já registrados.</div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Meu nome</div>
+        <div class="settings-row">
+          <div class="field">
+            <label>Nome como aparece na escala</label>
+            <input id="input-nome" type="text" value="${escapeHtml(state.perfil.nome)}" placeholder="Ex.: João Pedro Silva">
+            <div class="hint">Usado para localizar seus serviços automaticamente ao importar uma escala.</div>
+          </div>
+          <button class="btn btn-primary" onclick="salvarNome()">Salvar</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">IA usada para importar a escala</div>
+        <div class="field">
+          <label>Serviço de IA</label>
+          <select id="input-provider" onchange="onProviderChange(this.value)">
+            <option value="claude" ${state.provider==='claude'?'selected':''}>Claude (Anthropic)</option>
+            <option value="gemini" ${state.provider==='gemini'?'selected':''}>Google Gemini</option>
+          </select>
+        </div>
+        <div class="field" ${state.provider!=='claude'?'style="display:none;"':''} id="campo-key-claude">
+          <label>Chave de API da Anthropic</label>
+          <input id="input-apikey-claude" type="password" value="${escapeHtml(state.apiKeyClaude)}" placeholder="sk-ant-...">
+          <div class="hint">Gere em console.anthropic.com.</div>
+        </div>
+        <div class="field" ${state.provider!=='gemini'?'style="display:none;"':''} id="campo-key-gemini">
+          <label>Chave de API do Google Gemini</label>
+          <input id="input-apikey-gemini" type="password" value="${escapeHtml(state.apiKeyGemini)}" placeholder="AIza...">
+          <div class="hint">Gere em aistudio.google.com/apikey.</div>
+        </div>
+        <div class="hint" style="margin-bottom:14px;">Como este é um site estático, a chave trafega diretamente do seu navegador até o serviço escolhido a cada importação — use uma chave pessoal e evite computadores compartilhados ou públicos.</div>
+        <button class="btn btn-primary" onclick="salvarApiKeyForm()">Salvar</button>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Resumo</div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div><div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--red-garnet);">${total}</div><div class="event-meta">serviços no total</div></div>
+          <div><div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--red-garnet);">${futuros}</div><div class="event-meta">próximos</div></div>
+          <div><div style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--red-garnet);">${passados}</div><div class="event-meta">já realizados</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Todos os meus serviços <a class="link-quiet" onclick="goTo('calendario')">gerenciar no calendário</a></div>
+        ${meus.length ? meus.map(renderEventRow).join('') : `<div class="empty-state">${ICONS.empty}<div>Nenhum serviço cadastrado ainda. Importe sua escala ou adicione manualmente.</div></div>`}
+      </div>
+
+      <div style="margin-top:24px;text-align:right;">
+        <button class="btn btn-text" onclick="confirmarLimpeza()">Limpar todos os meus dados</button>
+      </div>
+    </div>`;
+}
+function onProviderChange(valor){
+  salvarProvider(valor);
+  render();
+}
+function salvarApiKeyForm(){
+  const provSel = document.getElementById('input-provider').value;
+  salvarProvider(provSel);
+  const vc = document.getElementById('input-apikey-claude').value;
+  const vg = document.getElementById('input-apikey-gemini').value;
+  salvarApiKeyClaude(vc);
+  salvarApiKeyGemini(vg);
+  showToast('Configuração salva neste navegador.');
+}
+function salvarNome(){
+  const v = document.getElementById('input-nome').value.trim();
+  state.perfil.nome = v;
+  savePerfil();
+  showToast(v ? 'Nome salvo.' : 'Nome removido.');
+}
+function confirmarLimpeza(){
+  if(confirm('Isso vai apagar todos os eventos, o nome e as chaves de API salvos neste navegador. Deseja continuar?')){
+    state.eventos = [];
+    state.perfil = {nome:''};
+    salvarApiKeyClaude(''); salvarApiKeyGemini('');
+    saveEventos(); savePerfil();
+    showToast('Dados apagados.');
+    goTo('inicio');
+  }
+}
+
+/* ================= PAGE: CALENDÁRIO ================= */
+function renderCalendario(){
+  let lista = state.eventos.slice();
+  const hoje = hojeISO();
+  if(state.calFiltro === 'proximos') lista = lista.filter(e => !e.data || e.data >= hoje);
+  if(state.calFiltro === 'passados') lista = lista.filter(e => e.data && e.data < hoje);
+
+  if(state.calOrdem === 'data'){
+    lista.sort((a,b)=>{
+      const da = a.data || '9999-99-99', db = b.data || '9999-99-99';
+      return state.calFiltro === 'passados' ? db.localeCompare(da) : da.localeCompare(db);
+    });
+  } else if(state.calOrdem === 'funcao'){
+    lista.sort((a,b)=> (a.funcao||'').localeCompare(b.funcao||''));
+  }
+
+  const pill = (id,label) => `<button class="pill ${state.calFiltro===id?'active':''}" onclick="setCalFiltro('${id}')">${label}</button>`;
+
+  return `
+    <div class="page">
+      <div class="page-title">Calendário</div>
+      <div class="page-sub">Todos os seus serviços, organizados por data ou função.</div>
+
+      <div class="pillbar">
+        ${pill('proximos','Próximos')}
+        ${pill('passados','Passados')}
+        ${pill('todos','Todos')}
+        <select onchange="setCalOrdem(this.value)" style="margin-left:auto;padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:0.84rem;background:var(--white);">
+          <option value="data" ${state.calOrdem==='data'?'selected':''}>Ordenar por data</option>
+          <option value="funcao" ${state.calOrdem==='funcao'?'selected':''}>Ordenar por função</option>
+        </select>
+      </div>
+
+      <div class="card">
+        ${lista.length ? lista.map(e=>renderEventRowDeletable(e)).join('') : `<div class="empty-state">${ICONS.calendar}<div>Nenhum serviço nesta visualização.</div></div>`}
+      </div>
+    </div>`;
+}
+function setCalFiltro(f){ state.calFiltro = f; render(); }
+function setCalOrdem(o){ state.calOrdem = o; render(); }
+
+function renderEventRowDeletable(e){
+  const {d,m} = formatDiaMes(e.data);
+  const badge = e.origem === 'manual'
+    ? `<span class="badge badge-manual">Manual</span>`
+    : `<span class="badge badge-importado">Importado</span>`;
+  const warn = e.incompleto ? `<span class="badge badge-warn">confirmar dados</span>` : '';
+  return `
+    <div class="event-row">
+      <div class="event-date-chip"><div class="d">${d}</div><div class="m">${m}</div></div>
+      <div class="event-main">
+        <div class="event-func">${e.funcao ? escapeHtml(e.funcao) : 'Função a confirmar'} ${badge}${warn}</div>
+        <div class="event-meta">${e.data ? diaDaSemana(e.data) : 'Dia a confirmar'}${e.horario ? ' · '+e.horario : ''}${e.local ? ' · '+escapeHtml(e.local) : ''}</div>
+        ${e.observacoes ? `<div class="event-meta" style="margin-top:4px;">${escapeHtml(e.observacoes)}</div>` : ''}
+      </div>
+      <button class="btn btn-text" onclick="removerEvento('${e.id}')" title="Remover">${ICONS.trash}</button>
+    </div>`;
+}
+function removerEvento(id){
+  state.eventos = state.eventos.filter(e=>e.id!==id);
+  saveEventos();
+  render();
+  showToast('Evento removido.');
+}
+
+/* ================= PAGE: ADICIONAR EVENTO ================= */
+function renderAdicionar(){
+  return `
+    <div class="page">
+      <div class="page-title">Adicionar Evento</div>
+      <div class="page-sub">Registre manualmente um serviço que não veio de uma escala importada.</div>
+      <div class="card" style="max-width:640px;">
+        <div class="field">
+          <label>Nome</label>
+          <input id="f-nome" type="text" value="${escapeHtml(state.perfil.nome)}" placeholder="Seu nome">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Data</label>
+            <input id="f-data" type="date" onchange="atualizarDiaSemanaForm()">
+          </div>
+          <div class="field">
+            <label>Dia da semana</label>
+            <input id="f-diasemana" type="text" readonly placeholder="preenchido automaticamente">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Horário</label>
+            <input id="f-horario" type="time">
+          </div>
+          <div class="field">
+            <label>Função</label>
+            <input id="f-funcao" type="text" placeholder="Ex.: Turiferário">
+          </div>
+        </div>
+        <div class="field">
+          <label>Local</label>
+          <input id="f-local" type="text" placeholder="Ex.: Matriz São Tarcísio">
+        </div>
+        <div class="field">
+          <label>Observações</label>
+          <textarea id="f-obs" rows="3" placeholder="Informações adicionais"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="salvarEventoManual()">${ICONS.plus} Salvar evento</button>
+      </div>
+    </div>`;
+}
+function atualizarDiaSemanaForm(){
+  const v = document.getElementById('f-data').value;
+  document.getElementById('f-diasemana').value = v ? diaDaSemana(v) : '';
+}
+function salvarEventoManual(){
+  const nome = document.getElementById('f-nome').value.trim();
+  const data = document.getElementById('f-data').value;
+  const horario = document.getElementById('f-horario').value;
+  const funcao = document.getElementById('f-funcao').value.trim();
+  const local = document.getElementById('f-local').value.trim();
+  const obs = document.getElementById('f-obs').value.trim();
+  if(!nome){ showToast('Informe o nome.'); return; }
+  if(!data){ showToast('Informe a data do serviço.'); return; }
+  state.eventos.push({
+    id: uid(), nome, data, diaSemana: diaDaSemana(data),
+    horario: horario || null, funcao: funcao || null, local: local || null,
+    observacoes: obs || null, origem: 'manual', incompleto: false,
+    criadoEm: new Date().toISOString()
+  });
+  saveEventos();
+  showToast('Evento adicionado.');
+  goTo('calendario');
+}
+
+/* ================= PAGE: IMPORTAR ESCALA ================= */
+function renderImportar(){
+  const f = state.importFlow;
+  const stepIndex = {upload:0, processando:1, revisao:2, concluido:3}[f.step];
+  const dots = [0,1,2,3].map(i => `<div class="step-dot ${i<=stepIndex?'done':''}"></div>`).join('');
+
+  let body = '';
+  const chaveAtual = state.provider === 'gemini' ? state.apiKeyGemini : state.apiKeyClaude;
+  const nomeProvider = state.provider === 'gemini' ? 'Gemini' : 'Claude';
+  if(!state.perfil.nome || !chaveAtual){
+    const faltando = !state.perfil.nome && !chaveAtual ? 'seu nome e uma chave de API' : (!state.perfil.nome ? 'seu nome' : `uma chave de API do ${nomeProvider}`);
+    body = `
+      <div class="banner">
+        <span>Defina ${faltando} em "Minha Escala" antes de importar, para que a IA saiba quem procurar.</span>
+        <button class="btn btn-ghost" onclick="goTo('minhaescala')">Configurar</button>
+      </div>`;
+  } else if(f.step === 'upload'){
+    body = `
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+        ${ICONS.upload}
+        <div class="dz-title">Envie o documento da escala</div>
+        <div class="dz-sub">PDF, DOCX ou TXT — clique ou arraste o arquivo aqui</div>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,.txt,.docx" style="display:none" onchange="onFileSelected(this.files[0])">
+      ${f.erro ? `<div class="banner banner-err" style="margin-top:16px;">${escapeHtml(f.erro)}</div>` : ''}
+    `;
+  } else if(f.step === 'processando'){
+    body = `
+      <div class="card" style="text-align:center;padding:50px 20px;">
+        <div class="spinner"></div>
+        <div style="font-weight:600;">Lendo "${escapeHtml(f.fileName)}"...</div>
+        <div class="event-meta" style="margin-top:6px;">A IA está interpretando a escala e procurando por "${escapeHtml(state.perfil.nome)}".</div>
+      </div>`;
+  } else if(f.step === 'revisao'){
+    if(!f.extracted.length){
+      body = `
+        <div class="banner banner-err">
+          Nenhuma ocorrência de "${escapeHtml(state.perfil.nome)}" foi encontrada com segurança neste documento. Verifique se o nome está escrito da mesma forma na escala, ou tente novamente.
+        </div>
+        <button class="btn btn-ghost" onclick="reiniciarImportacao()">Tentar novamente</button>`;
+    } else {
+      body = `
+        <div class="page-sub" style="margin-bottom:16px;">Confira os serviços encontrados para "${escapeHtml(state.perfil.nome)}". Ajuste o que for preciso e desmarque o que não deve ser adicionado.</div>
+        ${f.extracted.map((item,idx)=>renderReviewItem(item,idx)).join('')}
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button class="btn btn-primary" onclick="confirmarImportacao()">Adicionar eventos selecionados</button>
+          <button class="btn btn-text" onclick="reiniciarImportacao()">Cancelar</button>
+        </div>`;
+    }
+  } else if(f.step === 'concluido'){
+    body = `
+      <div class="card" style="text-align:center;padding:40px 20px;">
+        <div style="font-family:'Fraunces',serif;font-size:1.3rem;font-weight:600;margin-bottom:8px;">Escala importada</div>
+        <div class="event-meta" style="margin-bottom:20px;">Seus serviços já aparecem no painel e no calendário.</div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button class="btn btn-primary" onclick="goTo('inicio')">Ver painel</button>
+          <button class="btn btn-ghost" onclick="reiniciarImportacao()">Importar outra escala</button>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="page">
+      <div class="page-title">Importar Escala</div>
+      <div class="page-sub">Envie o documento da coordenação pastoral e deixe a IA localizar seus serviços.</div>
+      <div class="steps">${dots}</div>
+      ${body}
+    </div>`;
+}
+
+function renderReviewItem(item, idx){
+  const warn = item.incompleto ? `<div class="warn-line">⚠ Alguns dados não foram encontrados com segurança — confirme antes de salvar.</div>` : '';
+  return `
+    <div class="review-item">
+      <div class="review-head">
+        <input type="checkbox" id="chk-${idx}" ${item.incluir!==false?'checked':''} onchange="toggleIncluir(${idx}, this.checked)">
+        <div class="rh-name">${escapeHtml(item.funcao || 'Função não identificada')}</div>
+      </div>
+      <div class="review-grid">
+        <div class="mini-field"><label>Data</label><input type="date" value="${item.data||''}" onchange="editarCampoRevisao(${idx},'data',this.value)"></div>
+        <div class="mini-field"><label>Horário</label><input type="time" value="${item.horario||''}" onchange="editarCampoRevisao(${idx},'horario',this.value)"></div>
+        <div class="mini-field"><label>Função</label><input type="text" value="${escapeHtml(item.funcao||'')}" onchange="editarCampoRevisao(${idx},'funcao',this.value)"></div>
+        <div class="mini-field"><label>Local</label><input type="text" value="${escapeHtml(item.local||'')}" onchange="editarCampoRevisao(${idx},'local',this.value)"></div>
+        <div class="mini-field"><label>Observações</label><input type="text" value="${escapeHtml(item.observacoes||'')}" onchange="editarCampoRevisao(${idx},'observacoes',this.value)"></div>
+      </div>
+      ${warn}
+    </div>`;
+}
+function toggleIncluir(idx, checked){ state.importFlow.extracted[idx].incluir = checked; }
+function editarCampoRevisao(idx, campo, valor){ state.importFlow.extracted[idx][campo] = valor; }
+
+function reiniciarImportacao(){
+  state.importFlow = { step:'upload', fileName:'', rawText:'', extracted:[], erro:null, processando:false };
+  render();
+}
+
+async function onFileSelected(file){
+  if(!file) return;
+  state.importFlow.fileName = file.name;
+  state.importFlow.erro = null;
+  state.importFlow.step = 'processando';
+  render();
+
+  try{
+    let texto = '';
+    const ext = file.name.split('.').pop().toLowerCase();
+    if(ext === 'pdf'){
+      texto = await extrairTextoPDF(file);
+    } else if(ext === 'docx'){
+      texto = await extrairTextoDOCX(file);
+    } else {
+      texto = await file.text();
+    }
+    texto = (texto || '').trim();
+    if(!texto){
+      throw new Error('Não foi possível extrair texto deste arquivo.');
+    }
+    state.importFlow.rawText = texto;
+    const extraidos = await interpretarEscalaComIA(texto, state.perfil.nome);
+    state.importFlow.extracted = extraidos.map(x => ({...x, incluir: true}));
+    state.importFlow.step = 'revisao';
+  } catch(err){
+    console.error(err);
+    state.importFlow.erro = 'Não foi possível processar este arquivo (' + (err.message || 'erro desconhecido') + '). Tente novamente ou use outro formato.';
+    state.importFlow.step = 'upload';
+  }
+  render();
+}
+
+async function extrairTextoPDF(file){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+  let full = '';
+  for(let i=1; i<=pdf.numPages; i++){
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    full += content.items.map(it => it.str).join(' ') + '\\n';
+  }
+  return full;
+}
+async function extrairTextoDOCX(file){
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({arrayBuffer: buf});
+  return result.value;
+}
+
+function montarSystemPrompt(nome, hoje){
+  return `Você recebe o texto bruto de uma escala de coroinhas de uma paróquia (pode conter tabelas mal formatadas pela extração).
+Sua tarefa: encontrar TODAS as linhas/ocorrências em que a pessoa chamada "${nome}" está escalada (comparação sem diferenciar maiúsculas/minúsculas e acentos; aceite o nome aparecendo parcialmente, por exemplo só o primeiro e último nome, desde que seja claramente a mesma pessoa).
+Para cada ocorrência, extraia: data do serviço, horário, função/cargo atribuído, local (se houver) e quaisquer observações relevantes.
+Datas: converta para o formato ISO YYYY-MM-DD. Se o ano não estiver escrito, assuma o ano atual; se a data resultante já tiver passado há mais de 30 dias em relação a hoje (${hoje}), use o ano seguinte.
+Nunca invente dados. Se um campo não puder ser identificado com segurança, use null nesse campo e marque "incompleto": true no item.
+Responda APENAS com um JSON válido, sem markdown, sem comentários, no formato exato:
+{"eventos":[{"data":"YYYY-MM-DD ou null","horario":"HH:MM ou null","funcao":"string ou null","local":"string ou null","observacoes":"string ou null","incompleto":true|false}]}
+Se nenhuma ocorrência do nome for encontrada, responda {"eventos":[]}.`;
+}
+function limparJsonBruto(texto){
+  return texto.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+}
+
+async function interpretarEscalaComIA(texto, nome){
+  const textoLimitado = texto.length > 12000 ? texto.slice(0,12000) : texto;
+  const systemPrompt = montarSystemPrompt(nome, hojeISO());
+  if(state.provider === 'gemini'){
+    return interpretarComGemini(systemPrompt, textoLimitado);
+  }
+  return interpretarComClaude(systemPrompt, textoLimitado);
+}
+
+async function interpretarComClaude(systemPrompt, textoLimitado){
+  if(!state.apiKeyClaude){
+    throw new Error('Nenhuma chave de API da Anthropic configurada. Adicione em "Minha Escala".');
+  }
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": state.apiKeyClaude,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [
+        { role: "user", content: "Texto da escala:\\n\\n" + textoLimitado }
+      ]
+    })
+  });
+  if(!response.ok){
+    const errBody = await response.text().catch(()=> '');
+    throw new Error('Falha ao consultar o Claude (status ' + response.status + '). Verifique se a chave de API está correta. ' + errBody.slice(0,200));
+  }
+  const data = await response.json();
+  const textBlock = (data.content || []).find(c => c.type === 'text');
+  if(!textBlock) throw new Error('Resposta da IA vazia.');
+  let parsed;
+  try{ parsed = JSON.parse(limparJsonBruto(textBlock.text)); }
+  catch(e){ throw new Error('Não foi possível interpretar a resposta da IA.'); }
+  return (parsed.eventos || []);
+}
+
+async function interpretarComGemini(systemPrompt, textoLimitado){
+  if(!state.apiKeyGemini){
+    throw new Error('Nenhuma chave de API do Google Gemini configurada. Adicione em "Minha Escala".');
+  }
+  const modelo = 'gemini-flash-latest';
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": state.apiKeyGemini
+    },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: systemPrompt }] },
+      contents: [
+        { role: "user", parts: [{ text: "Texto da escala:\\n\\n" + textoLimitado }] }
+      ],
+      generationConfig: {
+        response_mime_type: "application/json",
+        temperature: 0.1
+      }
+    })
+  });
+  if(!response.ok){
+    const errBody = await response.text().catch(()=> '');
+    throw new Error('Falha ao consultar o Gemini (status ' + response.status + '). Verifique se a chave de API está correta. ' + errBody.slice(0,200));
+  }
+  const data = await response.json();
+  const cand = (data.candidates || [])[0];
+  const parte = cand && cand.content && (cand.content.parts || []).find(p => p.text);
+  if(!parte) throw new Error('Resposta da IA vazia.');
+  let parsed;
+  try{ parsed = JSON.parse(limparJsonBruto(parte.text)); }
+  catch(e){ throw new Error('Não foi possível interpretar a resposta da IA.'); }
+  return (parsed.eventos || []);
+}
+
+
+function confirmarImportacao(){
+  const selecionados = state.importFlow.extracted.filter(x => x.incluir !== false);
+  if(!selecionados.length){ showToast('Nenhum evento selecionado.'); return; }
+  selecionados.forEach(item => {
+    state.eventos.push({
+      id: uid(),
+      nome: state.perfil.nome,
+      data: item.data || null,
+      diaSemana: item.data ? diaDaSemana(item.data) : null,
+      horario: item.horario || null,
+      funcao: item.funcao || null,
+      local: item.local || null,
+      observacoes: item.observacoes || null,
+      origem: 'importado',
+      incompleto: !!item.incompleto,
+      criadoEm: new Date().toISOString()
+    });
+  });
+  saveEventos();
+  state.importFlow.step = 'concluido';
+  render();
+}
+
+/* ================= DRAG & DROP ================= */
+document.addEventListener('dragover', e => {
+  if(e.target.closest && e.target.closest('#dropzone')){ e.preventDefault(); e.target.closest('#dropzone').classList.add('drag'); }
+});
+document.addEventListener('dragleave', e => {
+  if(e.target.closest && e.target.closest('#dropzone')){ e.target.closest('#dropzone').classList.remove('drag'); }
+});
+document.addEventListener('drop', e => {
+  const dz = e.target.closest && e.target.closest('#dropzone');
+  if(dz){
+    e.preventDefault();
+    dz.classList.remove('drag');
+    if(e.dataTransfer.files[0]) onFileSelected(e.dataTransfer.files[0]);
+  }
+});
+
+/* ================= RENDER ROOT ================= */
+function render(){
+  const root = document.getElementById('root');
+  let pageHtml = '';
+  if(!state.loaded){
+    root.innerHTML = `<div class="page"><div class="empty-state">Carregando...</div></div>`;
+    return;
+  }
+  if(state.page === 'inicio') pageHtml = renderInicio();
+  else if(state.page === 'minhaescala') pageHtml = renderMinhaEscala();
+  else if(state.page === 'calendario') pageHtml = renderCalendario();
+  else if(state.page === 'adicionar') pageHtml = renderAdicionar();
+  else if(state.page === 'importar') pageHtml = renderImportar();
+
+  root.innerHTML = renderTopbar() + pageHtml + (state.toast ? `<div class="toast">${escapeHtml(state.toast)}</div>` : '');
+}
+
+loadData();
+</script>
+</body>
+</html>
